@@ -1,0 +1,417 @@
+/* ============================================================
+   Loader: quiet, short, skippable
+   ============================================================ */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: var(--ivory);
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  transition: transform 0.9s var(--ease-door), opacity 0.4s linear 0.5s;
+}
+#loader[hidden] { display: none; }
+#loader.is-done { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+.loader-name {
+  font-family: var(--identity);
+  font-size: clamp(1.5rem, 4.4vw, 3.25rem);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  display: flex;
+  overflow: hidden;
+}
+.loader-name span {
+  display: inline-block;
+  transform: translateY(110%);
+  animation: rise-in 0.85s var(--ease) forwards;
+  animation-delay: calc(var(--i) * 32ms);
+}
+.loader-name .sp { width: 0.35em; }
+@keyframes rise-in { to { transform: none; } }
+.loader-count {
+  position: absolute;
+  right: var(--gutter);
+  bottom: calc(var(--gutter) * 0.9);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-meta);
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+}
+
+/* ============================================================
+   Custom cursor
+   ============================================================ */
+#cursor {
+  position: fixed;
+  top: 0; left: 0;
+  z-index: 115;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+#cursor.is-on { opacity: 1; }
+.cursor-dot {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 9px; height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: #fff;
+  transition: width 0.35s var(--ease), height 0.35s var(--ease),
+              margin 0.35s var(--ease), border-radius 0.35s var(--ease),
+              background 0.3s;
+}
+.cursor-label {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #000;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+#cursor.has-label .cursor-dot {
+  width: 88px; height: 88px;
+  margin: -44px 0 0 -44px;
+  background: #fff;
+}
+#cursor.has-label .cursor-label { opacity: 1; transition-delay: 0.1s; }
+#cursor.is-small .cursor-dot { width: 34px; height: 34px; margin: -17px 0 0 -17px; }
+#cursor.is-hidden { opacity: 0; }
+
+@media (hover: none), (pointer: coarse) {
+  #cursor { display: none; }
+}
+html.has-cursor, html.has-cursor * { cursor: none !important; }
+
+/* ============================================================
+   Navigation
+   ============================================================ */
+#nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 90;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  color: var(--fg);
+  transition: transform 0.5s var(--ease), color 0.75s var(--ease);
+  mix-blend-mode: normal;
+}
+#nav.is-hidden { transform: translateY(-100%); }
+#nav::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  bottom: -40%;
+  background: linear-gradient(to bottom, var(--bg) 42%, transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+  z-index: -1;
+  pointer-events: none;
+}
+#nav.is-stuck::after { opacity: 1; }
+
+.nav-inner {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2rem;
+}
+.brand {
+  font-family: var(--identity);
+  font-size: clamp(1rem, 1.25vw, 1.2rem);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  display: flex;
+  white-space: nowrap;
+}
+.brand span { display: inline-block; transition: transform 0.4s var(--ease); }
+.brand .sp { width: 0.32em; }
+.brand:hover span { transform: translateY(var(--jitter, 0)); }
+
+.nav-links { display: flex; gap: clamp(1.1rem, 2.4vw, 2.5rem); }
+.nav-link {
+  font-size: var(--t-meta);
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  position: relative;
+  padding-block: 0.35rem;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0.1rem;
+  width: 100%; height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.45s var(--ease);
+}
+.nav-link:hover::after, .nav-link[aria-current]::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+.nav-link[aria-current] { color: var(--fg); }
+.nav-link:not([aria-current]) { color: var(--dim); }
+
+/* Mobile navigation holds the brief's 11-12px floor. The wordmark gives up
+   the width instead, since the links have to stay tappable and legible. */
+@media (max-width: 620px) {
+  .nav-inner { gap: 0.75rem; }
+  .nav-links { gap: 0.7rem; }
+  .nav-link { font-size: 0.6875rem; letter-spacing: 0.05em; }
+  .brand { font-size: 0.85rem; letter-spacing: 0.09em; }
+}
+@media (max-width: 400px) {
+  .nav-inner { gap: 0.5rem; }
+  .nav-links { gap: 0.55rem; }
+  .nav-link { font-size: 0.6875rem; letter-spacing: 0.02em; }
+  .brand { font-size: 0.78rem; letter-spacing: 0.06em; }
+}
+
+/* ============================================================
+   Page container + route transition
+   ============================================================ */
+#main { min-height: 100vh; }
+.page { opacity: 1; }
+.page.is-entering { animation: page-in 0.7s var(--ease) both; }
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(1.25rem); }
+  to { opacity: 1; transform: none; }
+}
+
+/* The "door": a project's cover expanding into its hero */
+#door {
+  position: fixed;
+  z-index: 100;
+  overflow: hidden;
+  pointer-events: none;
+  will-change: transform, width, height;
+}
+#door img { width: 100%; height: 100%; object-fit: cover; }
+#door .door-fill { position: absolute; inset: 0; }
+#veil {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+.footer {
+  border-top: 1px solid var(--rule);
+  padding-block: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 3vw, 2.5rem);
+}
+.footer-top {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: clamp(1.5rem, 3vw, 2rem);
+  align-items: start;
+}
+.footer-brand { grid-column: span 5; }
+.footer-brand .h3 { font-family: var(--identity); font-weight: 500; letter-spacing: 0.1em;
+  text-transform: uppercase; margin-bottom: 0.75rem; }
+.footer-nav { grid-column: span 3; display: grid; gap: 0.45rem; }
+.footer-reach { grid-column: span 4; display: grid; gap: 0.45rem; justify-items: start; }
+.footer a.u { position: relative; }
+.footer a.u::after {
+  content: '';
+  position: absolute; left: 0; bottom: -2px;
+  width: 100%; height: 1px; background: currentColor;
+  transform: scaleX(0); transform-origin: right;
+  transition: transform 0.45s var(--ease);
+}
+.footer a.u:hover::after { transform: scaleX(1); transform-origin: left; }
+.footer-bottom {
+  margin-top: clamp(3rem, 8vw, 7rem);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem 1.5rem;
+  flex-wrap: wrap;
+}
+/* ------------------------------------------------------------------
+   Build credit. The one element on the site allowed to ask for
+   attention, so it gets a live dot and a signal colour that sweeps
+   through the words. --signal is chosen to carry on every project
+   background, light and dark alike.
+   ------------------------------------------------------------------ */
+.footer-credit {
+  --signal: #E8562F;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.15em 0;
+  white-space: nowrap;
+}
+.credit-dot {
+  position: relative;
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--signal);
+  animation: credit-pulse 2.6s var(--ease) infinite;
+}
+.credit-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--signal);
+  animation: credit-ping 2.6s var(--ease) infinite;
+}
+@keyframes credit-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(0.8); }
+}
+@keyframes credit-ping {
+  0% { transform: scale(0.6); opacity: 0.9; }
+  70%, 100% { transform: scale(2.1); opacity: 0; }
+}
+
+/* A highlight travels through the letters every few seconds. */
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .credit-text {
+    /* The flat colour underneath guarantees the glyphs are always painted,
+       whatever the gradient is doing. */
+    background-color: currentColor;
+    background-image: linear-gradient(
+      100deg,
+      currentColor 0%, currentColor 40%,
+      var(--signal) 47%, var(--signal) 53%,
+      currentColor 60%, currentColor 100%
+    );
+    /* At 200% width the image covers the box at every position between 0%
+       and 100%, so the highlight can travel without ever leaving a gap. */
+    background-size: 200% 100%;
+    background-position: 0% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    /* Only the glyph fill goes transparent. `color` has to keep its real
+       value, because the gradient above reads it through currentColor. */
+    -webkit-text-fill-color: transparent;
+    animation: credit-sweep 4.6s var(--ease) infinite;
+  }
+}
+@keyframes credit-sweep {
+  0%, 45% { background-position: 0% 0; }
+  85%, 100% { background-position: 100% 0; }
+}
+
+.credit-arrow {
+  display: inline-block;
+  color: var(--signal);
+  transform: translate(-0.15em, 0.15em);
+  opacity: 0;
+  transition: transform 0.45s var(--ease), opacity 0.35s var(--ease);
+}
+/* An underline draws itself under the words on hover. */
+.footer-credit::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 1.1em;
+  bottom: -0.15em;
+  height: 1px;
+  background: var(--signal);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s var(--ease);
+}
+.footer-credit:hover::after,
+.footer-credit:focus-visible::after { transform: scaleX(1); }
+.footer-credit:hover .credit-arrow,
+.footer-credit:focus-visible .credit-arrow { opacity: 1; transform: translate(0, 0); }
+.footer-credit:hover .credit-text,
+.footer-credit:focus-visible .credit-text {
+  animation: none;
+  -webkit-text-fill-color: var(--signal);
+  color: var(--signal);
+}
+.footer-credit:hover .credit-dot { animation-duration: 1.1s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .credit-text { animation: none; -webkit-text-fill-color: var(--signal); color: var(--signal); }
+  .credit-dot, .credit-dot::after { animation: none; }
+  .credit-dot::after { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  .footer-bottom { flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+}
+/* The one small joke in the footer */
+.curiosity { cursor: pointer; font-family: var(--identity); font-size: 1.1em; }
+.curiosity em { font-style: italic; }
+
+@media (max-width: 860px) {
+  .footer-brand, .footer-nav, .footer-reach { grid-column: span 12; }
+  .footer-nav, .footer-reach { margin-top: 1.5rem; }
+}
+
+/* ============================================================
+   Buttons / links
+   ============================================================ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7em;
+  font-size: var(--t-meta);
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.95em 0;
+  position: relative;
+  color: var(--fg);
+}
+.btn .arrow { transition: transform 0.45s var(--ease); display: inline-block; }
+.btn:hover .arrow { transform: translateX(0.4em); }
+.btn::before {
+  content: '';
+  position: absolute; left: 0; bottom: 0;
+  width: 100%; height: 1px;
+  background: currentColor;
+  transform: scaleX(1); transform-origin: left;
+  transition: transform 0.5s var(--ease);
+}
+.btn:hover::before { transform: scaleX(0); transform-origin: right; }
+
+.btn-fill {
+  border: 1px solid var(--rule);
+  padding: 1em 1.6em;
+  border-radius: 100px;
+  overflow: hidden;
+  isolation: isolate;
+}
+.btn-fill::before { display: none; }
+.btn-fill::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--fg);
+  transform: translateY(101%);
+  transition: transform 0.5s var(--ease);
+  z-index: -1;
+}
+.btn-fill:hover { color: var(--bg); border-color: transparent; }
+.btn-fill:hover::after { transform: none; }
