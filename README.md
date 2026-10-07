@@ -8,6 +8,11 @@ No build step, no dependencies. Open it, edit it, drag it onto a host.
 
 ---
 
+
+[![Live](https://img.shields.io/badge/Live-gauri----khetan.vercel.app-3FB950?style=for-the-badge&logo=vercel&logoColor=0D1117&labelColor=3FB950)](https://gauri-khetan.vercel.app)
+
+**[Open the live site →](https://gauri-khetan.vercel.app)**
+
 ## Running it locally
 
 ```bash
